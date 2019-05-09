@@ -177,7 +177,15 @@ fn ruby_lib_link_name() -> String {
     let source = format!("{}/{}", rbconfig("libdir"), so_file);
     let target = format!("{}/{}", destination, so_file);
 
-    if !Path::new(&target).exists() {
+    let sym_link_exists = match fs::read_link(&target) {
+        Ok(path) => path.exists(),
+        Err(e) => {
+            println!("error: {}", e);
+            false
+        }
+    };
+
+    if ! sym_link_exists {
         let _ = symlink(source, target).expect("symlink fail");
     }
 
